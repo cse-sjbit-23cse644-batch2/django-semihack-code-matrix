@@ -1,1 +1,1 @@
-web: gunicorn project_name.wsgi
+web: gunicorn event_cert.wsgi
