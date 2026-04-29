@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Register — EventCert{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+  <div class="container">
+    <h1 class="fw-bold mb-2">
+      <i class="bi bi-person-plus me-2"></i>Event Registration
+    </h1>
+    <p class="lead opacity-75 mb-0">Fill in your details to register for an event.</p>
+  </div>
+</div>
+
+<div class="container pb-5" style="max-width: 680px;">
+  <div class="card p-4 p-md-5">
+
+    <!-- Info Banner -->
+    <div class="alert alert-info d-flex gap-2 align-items-start mb-4" role="alert">
+      <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+      <div>
+        <strong>Before you register:</strong> Make sure your payment receipt is ready
+        (PDF, PNG, or JPG — max 2 MB). Your Student ID and Transaction ID must be unique.
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate id="registration-form">
+      {% csrf_token %}
+
+      <!-- Student ID & Name -->
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label for="{{ form.student_id.id_for_label }}" class="form-label fw-semibold">
+            Student ID <span class="text-danger">*</span>
+          </label>
+          {{ form.student_id }}
+          {% if form.student_id.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.student_id.errors %}{{ error }}{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-sm-6">
+          <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+            Full Name <span class="text-danger">*</span>
+          </label>
+          {{ form.name }}
+          {% if form.name.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.name.errors %}{{ error }}{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+          Email Address <span class="text-danger">*</span>
+        </label>
+        {{ form.email }}
+        {% if form.email.errors %}
+        <div class="invalid-feedback d-block">
+          {% for error in form.email.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Event -->
+      <div class="mb-3">
+        <label for="{{ form.event.id_for_label }}" class="form-label fw-semibold">
+          Event <span class="text-danger">*</span>
+        </label>
+        {{ form.event }}
+        {% if form.event.errors %}
+        <div class="invalid-feedback d-block">
+          {% for error in form.event.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Transaction ID -->
+      <div class="mb-3">
+        <label for="{{ form.transaction_id.id_for_label }}" class="form-label fw-semibold">
+          Transaction ID <span class="text-danger">*</span>
+        </label>
+        {{ form.transaction_id }}
+        <div class="form-text">Enter the unique transaction ID from your payment confirmation.</div>
+        {% if form.transaction_id.errors %}
+        <div class="invalid-feedback d-block">
+          {% for error in form.transaction_id.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Receipt Upload -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+            Payment Receipt <span class="text-danger">*</span>
+        </label>
+        {{ form.receipt }}
+        <div class="form-text">
+          <i class="bi bi-info-circle me-1"></i>
+          Accepted formats: PDF, PNG, JPG &mdash; Maximum size: 2 MB
+        </div>
+        {% if form.receipt.errors %}
+        <div class="invalid-feedback d-block">
+          {% for error in form.receipt.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Non-field errors -->
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+        <p class="mb-0">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg fw-semibold" id="submit-btn">
+          <i class="bi bi-send me-2"></i>Submit Registration
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- What happens next -->
+  <div class="card mt-4 p-4">
+    <h6 class="fw-bold mb-3">
+      <i class="bi bi-list-check me-2 text-primary"></i>What happens next?
+    </h6>
+    <ol class="mb-0" style="padding-left:1.2rem;">
+      <li class="mb-2">You'll receive a confirmation email instantly.</li>
+      <li class="mb-2">Attend the event — your attendance will be marked by the organiser.</li>
+      <li class="mb-2">Submit feedback after the event.</li>
+      <li class="mb-0">
+        Download your <strong>verified PDF certificate</strong> with a QR code!
+      </li>
+    </ol>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Show loading spinner on submit
+  document.getElementById('registration-form').addEventListener('submit', function () {
+    document.getElementById('loading-overlay').classList.add('active');
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').innerHTML =
+      '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+  });
+</script>
+{% endblock %}

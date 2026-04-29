@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Home — EventCert{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="page-header text-center">
+  <div class="container">
+    <div class="mb-3">
+      <i class="bi bi-award-fill" style="font-size:3.5rem; color: var(--accent);"></i>
+    </div>
+    <h1 class="fw-bold display-5 mb-2">Event Certification System</h1>
+    <p class="lead opacity-75 mb-4">
+      Register · Attend · Get Certified — All in one place.
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'register' %}" class="btn btn-warning btn-lg fw-semibold px-4">
+        <i class="bi bi-person-plus me-2"></i>Register Now
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="container mb-5">
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card h-100 text-center p-4">
+        <div class="mb-3">
+          <span class="fs-1">📝</span>
+        </div>
+        <h5 class="fw-bold">Easy Registration</h5>
+        <p class="text-muted small">
+          Register with your student ID, upload your payment receipt, and get an instant confirmation email.
+        </p>
+        <a href="{% url 'register' %}" class="btn btn-primary mt-auto">Register</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 text-center p-4">
+        <div class="mb-3">
+          <span class="fs-1">📊</span>
+        </div>
+        <h5 class="fw-bold">Live Dashboard</h5>
+        <p class="text-muted small">
+          Real-time stats on attendance, feedback, and certificates. Toggle attendance without page reload.
+        </p>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-auto">View Dashboard</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 text-center p-4">
+        <div class="mb-3">
+          <span class="fs-1">🏆</span>
+        </div>
+        <h5 class="fw-bold">Verified Certificates</h5>
+        <p class="text-muted small">
+          PDF certificates with embedded QR codes. Scan to verify authenticity instantly.
+        </p>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-auto">View Participants</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Events Section -->
+  {% if events %}
+  <h3 class="fw-bold mb-4">
+    <i class="bi bi-calendar-event me-2 text-primary"></i>Upcoming Events
+  </h3>
+  <div class="row g-3">
+    {% for event in events %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center"
+               style="width:48px;height:48px;background:#E8EAF6;flex-shrink:0;">
+            <i class="bi bi-calendar3 text-primary fs-5"></i>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-semibold">{{ event.name }}</h6>
+            <small class="text-muted">{{ event.date|date:"F d, Y" }}</small>
+          </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+          <a href="{% url 'register' %}?event={{ event.pk }}"
+             class="btn btn-sm btn-primary flex-fill">
+            <i class="bi bi-person-plus me-1"></i>Register
+          </a>
+          <a href="{% url 'admin_dashboard' %}?event={{ event.pk }}"
+             class="btn btn-sm btn-outline-secondary flex-fill">
+            <i class="bi bi-list me-1"></i>Participants
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    No events found. <a href="/admin/events/event/add/">Add an event</a> via the Django admin.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — EventCert{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+  <div class="container">
+    <h1 class="fw-bold mb-2">
+      <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+    </h1>
+    <p class="lead opacity-75 mb-0">Manage participants, attendance, and certifications.</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Live Stats Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-4">
+      <div class="stat-card bg-stat-1">
+        <div class="stat-number" id="stat-total">{{ total }}</div>
+        <div class="stat-label">
+          <i class="bi bi-people me-1"></i>Total Participants
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="stat-card bg-stat-2">
+        <div class="stat-number" id="stat-attended">{{ attended }}</div>
+        <div class="stat-label">
+          <i class="bi bi-check2-circle me-1"></i>Attended
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="stat-card bg-stat-3">
+        <div class="stat-number" id="stat-certified">{{ certified }}</div>
+        <div class="stat-label">
+          <i class="bi bi-award me-1"></i>Certified
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters + Bulk Upload -->
+  <div class="row g-3 mb-4 align-items-end">
+    <!-- Event Filter -->
+    <div class="col-md-5">
+      <form method="get" class="d-flex gap-2 align-items-end">
+        <div class="flex-fill">
+          <label class="form-label fw-semibold mb-1 small">Filter by Event</label>
+          <select name="event" class="form-select form-select-sm">
+            <option value="">All Events</option>
+            {% for event in events %}
+            <option value="{{ event.pk }}" {% if selected_event == event.pk|stringformat:"s" %}selected{% endif %}>
+              {{ event.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-x-lg"></i>
+        </a>
+      </form>
+    </div>
+
+    <!-- Bulk Upload -->
+    <div class="col-md-7 text-md-end">
+      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bulkModal">
+        <i class="bi bi-upload me-1"></i>Bulk CSV Upload
+      </button>
+      <a href="{% url 'register' %}" class="btn btn-primary btn-sm ms-2">
+        <i class="bi bi-person-plus me-1"></i>Add Participant
+      </a>
+    </div>
+  </div>
+
+  <!-- Live update indicator -->
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <span class="badge bg-success">
+      <span class="spinner-grow spinner-grow-sm me-1" role="status"></span>
+      Live
+    </span>
+    <small class="text-muted">Stats refresh every 4 seconds</small>
+  </div>
+
+  <!-- Participants Table -->
+  <div class="card">
+    <div class="card-body p-0">
+      {% if participants %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="participants-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Student ID</th>
+              <th>Event</th>
+              <th>Email</th>
+              <th>Attendance</th>
+              <th>Feedback</th>
+              <th>Txn Verified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in participants %}
+            <tr id="row-{{ p.pk }}">
+              <td class="text-muted small">{{ forloop.counter }}</td>
+              <td>
+                <div class="fw-semibold">{{ p.name }}</div>
+                <div class="text-muted small">{{ p.transaction_id }}</div>
+              </td>
+              <td><code class="small">{{ p.student_id }}</code></td>
+              <td>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-normal">
+                  {{ p.event.name }}
+                </span>
+              </td>
+              <td class="small text-muted">{{ p.email }}</td>
+
+              <!-- Attendance Toggle -->
+              <td>
+                <button
+                  class="btn attendance-btn {% if p.attendance %}btn-success{% else %}btn-outline-secondary{% endif %}"
+                  data-participant-id="{{ p.pk }}"
+                  data-attended="{{ p.attendance|lower }}"
+                  onclick="toggleAttendance({{ p.pk }}, this)"
+                  title="Click to toggle attendance"
+                >
+                  {% if p.attendance %}
+                    <i class="bi bi-check-circle-fill me-1"></i>Present
+                  {% else %}
+                    <i class="bi bi-circle me-1"></i>Absent
+                  {% endif %}
+                </button>
+              </td>
+
+              <!-- Feedback -->
+              <td>
+                {% if p.feedback_submitted %}
+                  <span class="badge bg-success badge-status">
+                    <i class="bi bi-check me-1"></i>Done
+                  </span>
+                {% else %}
+                  <a href="{% url 'feedback' p.pk %}" class="badge bg-warning text-dark badge-status text-decoration-none">
+                    <i class="bi bi-pencil me-1"></i>Pending
+                  </a>
+                {% endif %}
+              </td>
+
+              <!-- Txn Verified -->
+              <td>
+  <button
+    class="btn txn-btn {% if p.transaction_verified %}btn-success{% else %}btn-outline-danger{% endif %}"
+    onclick="toggleTransaction({{ p.pk }}, this)"
+  >
+    {% if p.transaction_verified %}
+      <i class="bi bi-check-circle"></i> Yes
+    {% else %}
+      <i class="bi bi-x-circle"></i> No
+    {% endif %}
+  </button>
+</td>
+
+              <!-- Actions -->
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  <a href="{% url 'feedback' p.pk %}" class="btn btn-sm btn-outline-primary" title="Feedback">
+                    <i class="bi bi-chat-left-text"></i>
+                  </a>
+                  {% if p.can_get_certificate %}
+                  <a href="{% url 'download_certificate' p.pk %}"
+                     class="btn btn-sm btn-success" title="Download Certificate">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                  {% else %}
+                  <button class="btn btn-sm btn-outline-secondary" disabled title="Certificate not available yet">
+                    <i class="bi bi-lock"></i>
+                  </button>
+                  {% endif %}
+                  <a href="{% url 'verify_certificate' p.certificate_id %}"
+                     class="btn btn-sm btn-outline-info" title="Verify Certificate" target="_blank">
+                    <i class="bi bi-qr-code-scan"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-3">No participants found.</p>
+        <a href="{% url 'register' %}" class="btn btn-primary">
+          <i class="bi bi-person-plus me-2"></i>Register First Participant
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Upload Modal -->
+<div class="modal fade" id="bulkModal" tabindex="-1" aria-labelledby="bulkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 bg-primary text-white">
+        <h5 class="modal-title" id="bulkModalLabel">
+          <i class="bi bi-upload me-2"></i>Bulk CSV Upload
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'bulk_upload' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="alert alert-info small">
+            <strong>Required CSV columns:</strong><br>
+            <code>name, email, student_id, transaction_id, event_id</code>
+          </div>
+          {{ bulk_form.csv_file.label_tag }}
+          {{ bulk_form.csv_file }}
+          <div class="form-text">{{ bulk_form.csv_file.help_text }}</div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-upload me-1"></i>Upload & Import
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/ajax_toggle.js"></script>
+<script>
+  // ── Real-time stats polling ────────────────────────────────────────────────
+  const eventParam = "{% if selected_event %}?event={{ selected_event }}{% endif %}";
+
+  function fetchStats() {
+    fetch(`/api/stats/${eventParam}`)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('stat-total').textContent     = data.total;
+        document.getElementById('stat-attended').textContent  = data.attended;
+        document.getElementById('stat-certified').textContent = data.certified;
+      })
+      .catch(err => console.warn('Stats fetch failed:', err));
+  }
+
+  // Poll every 4 seconds
+  setInterval(fetchStats, 4000);
+
+  function toggleTransaction(participantId, btn) {
+  fetch(`/toggle-transaction/${participantId}/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken"),
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.transaction_verified) {
+      btn.classList.remove("btn-outline-danger");
+      btn.classList.add("btn-success");
+      btn.innerHTML = '<i class="bi bi-check-circle"></i> Yes';
+    } else {
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-outline-danger");
+      btn.innerHTML = '<i class="bi bi-x-circle"></i> No';
+    }
+  });
+}
+
+</script>
+{% endblock %}

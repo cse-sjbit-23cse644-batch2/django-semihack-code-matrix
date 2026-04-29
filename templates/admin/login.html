@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fb;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+        .left {
+            flex: 1;
+            background: #0d6efd;
+            color: white;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .left p {
+            opacity: 0.9;
+            margin-bottom: 25px;
+        }
+
+        .features {
+            margin-top: 20px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feature i {
+            margin-right: 10px;
+        }
+
+        /* RIGHT PANEL */
+        .right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            width: 380px;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .login-sub {
+            font-size: 14px;
+            color: gray;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        input:focus {
+            border-color: #0d6efd;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #0b5ed7;
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 13px;
+            text-align: center;
+            color: gray;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="left">
+        <h1>EventCert</h1>
+        <p>Smart Event Lifecycle & Certification Platform</p>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fa fa-check-circle"></i>
+                Secure participant validation
+            </div>
+            <div class="feature">
+                <i class="fa fa-check-circle"></i>
+                QR-based certificate verification
+            </div>
+            <div class="feature">
+                <i class="fa fa-check-circle"></i>
+                Real-time attendance tracking
+            </div>
+            <div class="feature">
+                <i class="fa fa-check-circle"></i>
+                Automated certificate generation
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+        <div class="login-box">
+
+            <div class="login-title">Admin Login</div>
+            <div class="login-sub">Enter credentials to access dashboard</div>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <button type="submit">Sign In</button>
+            </form>
+
+            <div class="footer">
+                Authorized access only • EventCert System
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

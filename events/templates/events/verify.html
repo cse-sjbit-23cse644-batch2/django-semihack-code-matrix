@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Verify Certificate — EventCert{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+  <div class="container">
+    <h1 class="fw-bold mb-2">
+      <i class="bi bi-patch-check me-2"></i>Certificate Verification
+    </h1>
+    <p class="lead opacity-75 mb-0">Verify the authenticity of an EventCert certificate.</p>
+  </div>
+</div>
+
+<div class="container pb-5" style="max-width:580px;">
+  {% if participant %}
+
+    {% if verified %}
+    <!-- VERIFIED -->
+    <div class="card p-5 text-center">
+      <div class="mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+             style="width:90px;height:90px;background:#E8F5E9;">
+          <i class="bi bi-patch-check-fill text-success" style="font-size:3rem;"></i>
+        </div>
+        <h3 class="fw-bold text-success mb-1">Certificate Verified ✔</h3>
+        <p class="text-muted">This is an authentic EventCert certificate.</p>
+      </div>
+
+      <!-- Details -->
+      <div class="border rounded-3 text-start p-4 mb-4">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold text-uppercase mb-1">Recipient</div>
+            <div class="fw-bold">{{ participant.name }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold text-uppercase mb-1">Student ID</div>
+            <div><code>{{ participant.student_id }}</code></div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold text-uppercase mb-1">Event</div>
+            <div class="fw-semibold">{{ participant.event.name }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold text-uppercase mb-1">Event Date</div>
+            <div>{{ participant.event.date|date:"F d, Y" }}</div>
+          </div>
+          <div class="col-12">
+            <div class="small text-muted fw-semibold text-uppercase mb-1">Certificate ID</div>
+            <div class="small font-monospace text-break">{{ certificate_id }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditions confirmed -->
+      <div class="d-flex gap-2 justify-content-center flex-wrap mb-4">
+        <span class="badge bg-success px-3 py-2">
+          <i class="bi bi-calendar-check me-1"></i>Attended
+        </span>
+        <span class="badge bg-success px-3 py-2">
+          <i class="bi bi-chat-left-text me-1"></i>Feedback Submitted
+        </span>
+        <span class="badge bg-success px-3 py-2">
+          <i class="bi bi-credit-card me-1"></i>Transaction Verified
+        </span>
+      </div>
+
+      <a href="{% url 'download_certificate' participant.pk %}"
+         class="btn btn-success btn-lg">
+        <i class="bi bi-download me-2"></i>Download Certificate PDF
+      </a>
+    </div>
+
+    {% else %}
+    <!-- NOT ELIGIBLE / Conditions not met -->
+    <div class="card p-5 text-center">
+      <div class="mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+             style="width:90px;height:90px;background:#FFF3E0;">
+          <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:3rem;"></i>
+        </div>
+        <h3 class="fw-bold text-warning mb-1">Not Eligible ❌</h3>
+        <p class="text-muted">
+          A participant with this ID exists but has not yet met all conditions for certification.
+        </p>
+      </div>
+
+      <div class="border rounded-3 text-start p-4 mb-4">
+        <div class="fw-semibold mb-3">{{ participant.name }}</div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small">Attendance</span>
+          {% if participant.attendance %}
+          <span class="badge bg-success">✔ Yes</span>
+          {% else %}
+          <span class="badge bg-danger">✘ No</span>
+          {% endif %}
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small">Feedback Submitted</span>
+          {% if participant.feedback_submitted %}
+          <span class="badge bg-success">✔ Yes</span>
+          {% else %}
+          <span class="badge bg-danger">✘ No</span>
+          {% endif %}
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="small">Transaction Verified</span>
+          {% if participant.transaction_verified %}
+          <span class="badge bg-success">✔ Yes</span>
+          {% else %}
+          <span class="badge bg-danger">✘ No</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <small class="text-muted">Certificate ID: {{ certificate_id }}</small>
+    </div>
+    {% endif %}
+
+  {% else %}
+  <!-- Not found -->
+  <div class="card p-5 text-center">
+    <div class="mb-4">
+      <i class="bi bi-x-circle-fill text-danger" style="font-size:3.5rem;"></i>
+    </div>
+    <h3 class="fw-bold text-danger mb-2">Certificate Not Found ❌</h3>
+    <p class="text-muted mb-0">
+      No certificate matching ID <code>{{ certificate_id }}</code> was found in our records.
+      It may be invalid or has been revoked.
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="text-center mt-4">
+    <a href="{% url 'index' %}" class="btn btn-link text-muted">
+      <i class="bi bi-house me-1"></i>Back to Home
+    </a>
+  </div>
+</div>
+{% endblock %}
